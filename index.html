@@ -4,32 +4,46 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>MADAS — ספריית אימונים</title>
-<!-- PWA + צבע כרום -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#111111">
 
-<!-- iOS home screen icon (שימו לב: נתיבים יחסיים, לא עם / בהתחלה) -->
-<!-- קודם ננסה 180x180, ואם אין—נפנה ישירות ל-192x192 שהעלית -->
-<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=3">
-<link rel="apple-touch-icon" href="icons/192x192.PNG?v=3"> <!-- גיבוי ל-iOS אם 180 לא קיים -->
-
-<!-- המלצה נוספת ל-iOS -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="MADAS">s="180x180" href="icons/apple-touch-icon.png?v=1">
-  <!-- חיבור ה-PWA -->
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#111111">
 
-  <!-- תמיכה באייקון/מסך מלא ב-iOS -->
+  <!-- iOS: אייקון ומסך מלא -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="apple-touch-icon" href="icons/192x192.png">
+  <meta name="apple-mobile-web-app-title" content="MADAS">
+  <!-- נסה קודם 180x180 (אם יצרת), ואם לא — יש גם קישור מפורש ל-192x192 -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=3">
+  <link rel="apple-touch-icon" href="icons/192x192.PNG?v=3">
 
-  <!-- מפנה אוטומטית לדף הספרייה -->
+  <!-- הפניה אוטומטית לדף הספרייה -->
   <meta http-equiv="refresh" content="0; url=library.html">
+  <meta name="robots" content="noindex">
+  <style>
+    /* מסך טעינה קצר בזמן ההפניה */
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+      font-family: system-ui, -apple-system, "Heebo", "Rubik", Arial, sans-serif;
+      background: #0b0f14; color: #ffffff; display: grid; place-items: center;
+    }
+    .wrap { text-align: center }
+    .logo { width: 96px; height: 96px; margin-bottom: 16px; }
+    .hint { opacity: .7; font-size: 14px }
+  </style>
 </head>
 <body>
-  <p>טוען את האפליקציה…</p>
+  <div class="wrap">
+    <img class="logo" src="icons/192x192.PNG" alt="MADAS logo" />
+    <div>טוען את האפליקציה…</div>
+    <div class="hint">אם לא הועברת, <a href="library.html" style="color:#8fd3ff">לחץ/י כאן</a></div>
+  </div>
+
+  <script>
+    // רישום Service Worker (אופציונלי אם כבר נרשם בדפים הפנימיים)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    }
+  </script>
 </body>
 </html>
