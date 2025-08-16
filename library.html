@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>MADAS — ספריית אימונים</title>
+
+<!-- קובץ manifest.json -->
+<link rel="manifest" href="manifest.json">
+
+<!-- צבע ברירת מחדל לדפדפן -->
+<meta name="theme-color" content="#111111">
+
+<!-- תמיכה ב-iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+
+/* Assistant Regular – משקל רגיל */
+@font-face {
+  font-family: "Assistant";
+  src: url("fonts/assistant/Assistant-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Assistant Bold – משקל מודגש */
+@font-face {
+  font-family: "Assistant";
+  src: url("fonts/assistant/Assistant-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* מיפוי משקלים נוספים ל-Bold כדי למנוע נפילה לפונט אחר */
+@font-face {
+  font-family: "Assistant";
+  src: url("fonts/assistant/Assistant-Bold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Assistant";
+  src: url("fonts/assistant/Assistant-Bold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Assistant";
+  src: url("fonts/assistant/Assistant-Bold.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* הגדרה גלובלית – תחיל את הפונט על כל האתר */
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Assistant", Arial, sans-serif;
+}
+
+/* אופציונלי – לאכוף את הפונט על כל האלמנטים */
+* {
+  font-family: "Assistant", Arial, sans-serif;
+
+}
+
+body {
+  font-family: "Assistant", Arial, sans-serif;
+
+}
+
+:root{
+  --bg:#ffffff; --ink:#0b0f14; --ink-dim:rgba(11,15,20,.75);
+  --card-bg:#f7f7f7; --card-bd:#e6e6e6;
+  --btn-ghost:#f0f0f0; --btn-ghost-bd:#d9d9d9;
+  --danger-bg:rgba(255,82,82,.1); --danger-bd:rgba(255,82,82,.35);
+}
+
+.brand-logo {
+  max-height: 100px;
+  height: auto;
+  width: auto;
+  position: relative;
+  left: 20px;
+
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.nowrap{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.wrap{
+  min-height:100dvh;
+  padding:max(16px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) 96px max(20px,env(safe-area-inset-left));
+}
+
+header{display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.brand{font-weight:900;font-size:28px;letter-spacing:.2px}
+
+/* גריד כרטיסים */
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{
+  background:var(--card-bg); border:1px solid var(--card-bd);
+  border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:10px;
+}
+.card h3{margin:0;font-size:20px;font-weight:900}
+.meta{font-size:13px;color:var(--ink-dim)}
+.meta-chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--card-bd)}
+
+/* פעולות בכרטיס: שני כפתורים אחידים בשורה */
+.row-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
+.row-actions .btn{
+  width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;
+  padding:0 10px;border:1px solid var(--btn-ghost-bd);border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;background:var(--btn-ghost);color:var(--ink)
+}
+.row-actions .btn.primary{background:#111;color:#fff;border-color:#111}
+
+/* מצב ריק */
+.empty{opacity:.9;font-size:15px;margin-top:18px}
+
+/* פוטר הוספה */
+.footer{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;
+  padding:12px max(20px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.05));
+  display:flex;justify-content:center;
+}
+.add-btn{
+  border:0;border-radius:14px;padding:14px 18px;font-weight:900;font-size:18px;background:#111;color:#fff;cursor:pointer;white-space:nowrap;width:min(720px,94vw)
+}
+
+/* חלוניות */
+.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;z-index:30;background:rgba(0,0,0,.35);backdrop-filter:blur(2px)}
+.sheet{
+  width:min(720px,96vw);max-height:84vh;overflow:auto;
+  background:#fff;border:1px solid var(--card-bd);border-radius:16px;padding:16px;color:#000
+}
+.sheet h2{margin:0 0 10px;font-size:22px;font-weight:900}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{font-size:14px;opacity:.95}
+input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--card-bd);background:#fff;color:#000;font-size:15px}
+.ex-row{display:grid;grid-template-columns:1fr 110px 44px;gap:8px;align-items:center}
+.ex-row .del{border:1px solid var(--card-bd);background:#fafafa;color:#000;border-radius:10px;height:42px;cursor:pointer;font-weight:900}
+.actions-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.btn{border-radius:12px;padding:10px 16px;font-weight:800;cursor:pointer}
+.btn.save{background:#111;color:#fff;border:1px solid #111}
+.btn.cancel{background:#fafafa;border:1px solid var(--btn-ghost-bd);color:#000}
+.list{margin:8px 0 0;padding:0;list-style:none}
+.list li{padding:8px 10px;margin:6px 0;background:#fafafa;border:1px solid var(--card-bd);border-radius:12px;display:flex;justify-content:space-between}
+
+@media (max-width:560px){ .grid-2{grid-template-columns:1fr} .ex-row{grid-template-columns:1fr 110px 44px} }
+</style>
+</head>
+<body>
+
+<section class="wrap" id="lib">
+  <header><div class="brand"><img src="images/logo.png" alt="MADAS logo" class="brand-logo"></div></header>
+
+  <div id="cards" class="grid"></div>
+  <div id="emptyState" class="empty" style="display:none;">אין עדיין אימונים. לחץ על “+ אימון חדש”.</div>
+</section>
+
+<div class="footer">
+  <button id="addWorkoutBottom" class="add-btn">+ אימון חדש</button>
+</div>
+
+<!-- עריכה / יצירה -->
+<div id="editOverlay" class="overlay" aria-hidden="true">
+  <div class="sheet" data-sheet>
+    <h2 id="editTitle">אימון חדש</h2>
+    <div class="grid-2">
+      <div><label>שם האימון</label><input id="f_name" placeholder="כוח 3x12 ×4"></div>
+      <div><label>מס’ סבבים</label><input id="f_rounds" type="number" min="1" value="4"></div>
+      <div><label>מנוחה קצרה (שניות)</label><input id="f_restEx" type="number" min="0" value="15"></div>
+      <div><label>מנוחה ארוכה (שניות)</label><input id="f_restRound" type="number" min="0" value="90"></div>
+    </div>
+    <div style="margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>תרגילים</strong>
+        <button id="addEx" class="btn cancel nowrap" style="padding:8px 12px;">+ תרגיל</button>
+      </div>
+      <div id="exList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+    </div>
+    <div class="actions-bar">
+      <button class="btn cancel nowrap" data-close="editOverlay">בטל</button>
+      <button id="saveWorkout" class="btn save nowrap">שמור</button>
+    </div>
+  </div>
+</div>
+
+<!-- פירוט -->
+<div id="detailOverlay" class="overlay" aria-hidden="true">
+  <div class="sheet" data-sheet>
+    <h2 id="detailName" class="nowrap">—</h2>
+    <div id="detailMeta" class="nowrap" style="opacity:.85;margin-bottom:6px">—</div>
+    <ul id="detailList" class="list"></ul>
+    <div class="actions-bar" style="justify-content:space-between">
+      <div style="display:flex;gap:8px">
+        <button class="btn save nowrap" id="detailStart">התחל אימון</button>
+        <button class="btn cancel nowrap" id="detailEdit">עריכה</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn cancel nowrap" data-close="detailOverlay">סגור</button>
+        <button class="btn cancel nowrap" id="detailDelete">מחיקה</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- מחיקה -->
+<div id="deleteOverlay" class="overlay" aria-hidden="true">
+  <div class="sheet" data-sheet>
+    <h2>מחיקת אימון</h2>
+    <div>למחוק את <strong id="delName" class="nowrap">—</strong>?</div>
+    <div class="actions-bar">
+      <button class="btn cancel nowrap" data-close="deleteOverlay">בטל</button>
+      <button id="confirmDelete" class="btn save nowrap">מחק</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const KEY="anaWorkouts_v1";
+  const $=id=>document.getElementById(id);
+
+  const cards=$("cards"), empty=$("emptyState");
+
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]} }
+  function save(x){ localStorage.setItem(KEY, JSON.stringify(x)); }
+  function seedIfEmpty(){
+    const arr=load(); if(arr.length===0){
+      arr.push({id:crypto.randomUUID(),name:"כוח 3x12 ×4",rounds:4,restEx:15,restRound:90,phases:[{n:"מתח",r:12},{n:"שכיבות שמיכה",r:12},{n:"מקבילים",r:12}],updatedAt:Date.now()});
+      save(arr);
+    }
+  }
+
+  // ---------- רנדר כרטיסים (רק "התחל" ו"פירוט")
+  function render(){
+    const arr=load(); cards.innerHTML="";
+    if(arr.length===0){ empty.style.display="block"; return; }
+    empty.style.display="none";
+    arr.forEach(w=>{
+      const perRound=w.phases.reduce((s,p)=>s+(p.r||0),0);
+      const meta=`${w.rounds} סבבים · ${w.phases.length} תרגילים · ${perRound*w.rounds} חזרות`;
+      const card=document.createElement("div"); card.className="card"; card.dataset.id=w.id;
+      card.innerHTML=`
+        <h3 class="nowrap" title="${w.name}">${w.name}</h3>
+        <div class="meta"><span class="meta-chip nowrap">${meta}</span></div>
+        <div class="row-actions">
+          <button class="btn primary nowrap" data-action="start">התחל</button>
+          <button class="btn nowrap" data-action="detail">פירוט</button>
+        </div>`;
+      cards.appendChild(card);
+    });
+  }
+
+  // ---------- האזנה עם האצלת אירועים (יציב יותר לכרטיסים דינמיים)
+  cards.addEventListener('click', (ev)=>{
+    const btn = ev.target.closest('[data-action]'); if(!btn) return;
+    const card = ev.target.closest('.card'); if(!card) return;
+    const id   = card.dataset.id;
+    if(btn.dataset.action==='start'){ goWorkout(id); }
+    if(btn.dataset.action==='detail'){ openDetail(id); }
+  });
+
+  // ---------- פוטר: אימון חדש
+  $("addWorkoutBottom").addEventListener('click', ()=> openEdit(null));
+
+  // ---------- חלוניות — פתיחה/סגירה בטוחה
+  const overlays={ edit:$("editOverlay"), detail:$("detailOverlay"), del:$("deleteOverlay") };
+  function open(id){ overlays[id].style.display="flex"; overlays[id].setAttribute('aria-hidden','false'); }
+  function close(id){ overlays[id].style.display="none"; overlays[id].setAttribute('aria-hidden','true'); }
+
+  // סגירה בלחיצה על רקע
+  Object.values(overlays).forEach(ov=>{
+    ov.addEventListener("click",e=>{ if(e.target===ov) ov.style.display="none"; });
+    ov.querySelectorAll("[data-sheet]").forEach(sh=> sh.addEventListener("click",e=>e.stopPropagation()));
+  });
+  // סגירה ב־ESC
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ Object.keys(overlays).forEach(close); }});
+  // סגירה ע"י data-close (כולל “בטל”)
+  document.addEventListener("click", function(ev){
+    const x = ev.target.closest("[data-close]"); if(!x) return;
+    const id = x.getAttribute("data-close"); if(id && overlays[id]) close(id);
+  }, true);
+
+  // ---------- ניווט לאימון
+  function goWorkout(id){ location.href = `workout.html?id=${encodeURIComponent(id)}`; }
+
+  // ---------- פירוט
+  const detailName=$("detailName"), detailMeta=$("detailMeta"), detailList=$("detailList");
+  $("detailStart").addEventListener('click', ()=> { if(currentId) goWorkout(currentId); });
+  $("detailEdit").addEventListener('click', ()=> { if(!currentId) return; close('detail'); openEdit(currentId); });
+  $("detailDelete").addEventListener('click', ()=> { if(!currentId) return; close('detail'); openDelete(currentId); });
+
+  let currentId=null;
+  function openDetail(id){
+    const w=load().find(x=>x.id===id); if(!w) return;
+    currentId=id;
+    const perRound=w.phases.reduce((s,p)=>s+(p.r||0),0);
+    detailName.textContent=w.name;
+    detailMeta.textContent=`${w.rounds} סבבים · ${w.phases.length} תרגילים · ${perRound*w.rounds} חזרות`;
+    detailList.innerHTML="";
+    w.phases.forEach((p,i)=>{
+      const li=document.createElement("li");
+      li.innerHTML=`<span class="nowrap">${i+1}. ${p.n}</span><span class="nowrap">${p.r} חזרות</span>`;
+      detailList.appendChild(li);
+    });
+    open('detail');
+  }
+
+  // ---------- עריכה / יצירה
+  const f_name=$("f_name"), f_rounds=$("f_rounds"), f_restEx=$("f_restEx"), f_restRound=$("f_restRound"), exList=$("exList");
+  $("addEx").addEventListener('click', ()=> exList.appendChild(exRow()));
+
+  function exRow(name="",reps=""){
+    const wrap=document.createElement("div"); wrap.className="ex-row";
+    wrap.innerHTML=`<input placeholder="שם תרגיל" value="${name}">
+                    <input type="number" min="1" placeholder="חזרות" value="${reps}">
+                    <button class="del" title="הסר">–</button>`;
+    wrap.querySelector(".del").addEventListener('click', ()=> wrap.remove());
+    return wrap;
+  }
+
+  let editId=null;
+  function openEdit(id){
+    const arr=load(); editId=id||null; $("editTitle").textContent=id?"עריכת אימון":"אימון חדש";
+    if(id){
+      const w=arr.find(x=>x.id===id); if(!w) return;
+      f_name.value=w.name; f_rounds.value=w.rounds; f_restEx.value=w.restEx; f_restRound.value=w.restRound;
+      exList.innerHTML=""; w.phases.forEach(p=>exList.appendChild(exRow(p.n,p.r)));
+    }else{
+      f_name.value=""; f_rounds.value=4; f_restEx.value=15; f_restRound.value=90;
+      exList.innerHTML=""; exList.appendChild(exRow()); exList.appendChild(exRow());
+    }
+    open('edit');
+  }
+
+  $("saveWorkout").addEventListener('click', ()=>{
+    const name=f_name.value.trim(), rounds=+f_rounds.value||1, restEx=+f_restEx.value||0, restRound=+f_restRound.value||0;
+    const phases=[]; exList.querySelectorAll(".ex-row").forEach(r=>{
+      const [nEl,rEl]=r.querySelectorAll("input"); const n=nEl.value.trim(); const reps=+rEl.value||0;
+      if(n && reps>0) phases.push({n,r:reps});
+    });
+    if(!name){ alert("צריך שם אימון"); return; }
+    if(!phases.length){ alert("צריך לפחות תרגיל אחד"); return; }
+    const arr=load();
+    if(editId){
+      const i=arr.findIndex(x=>x.id===editId);
+      if(i>-1) arr[i]={...arr[i],name,rounds,restEx,restRound,phases,updatedAt:Date.now()};
+    }else{
+      arr.unshift({id:crypto.randomUUID(),name,rounds,restEx,restRound,phases,updatedAt:Date.now()});
+    }
+    save(arr); close('edit'); render();
+  });
+
+  // ---------- מחיקה
+  let deleteId=null;
+  const delName=$("delName");
+  function openDelete(id){
+    deleteId=id;
+    const w=load().find(x=>x.id===id);
+    delName.textContent=w?w.name:"—";
+    open('del');
+  }
+  $("confirmDelete").addEventListener('click', ()=>{
+    if(!deleteId) return;
+    const arr=load().filter(x=>x.id!==deleteId);
+    save(arr); deleteId=null; close('del'); render();
+  });
+
+  // ---------- Init
+  seedIfEmpty(); render();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>MADAS — אימון</title>
+
+<!-- קובץ manifest.json -->
+<link rel="manifest" href="manifest.json">
+
+<!-- צבע ברירת מחדל לדפדפן -->
+<meta name="theme-color" content="#111111">
+
+<!-- תמיכה ב-iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<style>
+
+@font-face {
+  font-family: "Assistant";
+  src: url("fonts/assistant/Assistant-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* ... שאר הבלוקים עד ה-* { font-family... } */
+
+:root{
+  --bg:#ffffff;
+  --ink:#0b0f14;
+  --ink-muted:rgba(11,15,20,.65);
+
+  /* טינטים חזקים יותר במרכז (radial), דוהים לשוליים */
+  --work-tint: rgba(255, 82, 82, .16);    /* אדמדם עדין-מודגש */
+  --rest-tint: rgba(46, 204, 113, .16);   /* ירקרק עדין-מודגש */
+
+  /* כפתורים */
+  --btn-primary-bg:#111111;
+  --btn-primary-ink:#ffffff;
+  --btn-ghost-ink:#0b0f14;
+  --btn-ghost-border:#d9d9d9;
+}
+
+*{box-sizing:border-box}
+html,body{
+  height:100%; margin:0; overscroll-behavior:none;
+  background:var(--bg); color:var(--ink);
+  font-family: "Assistant", Arial, sans-serif;
+  transition:background .6s ease, color .2s ease;
+}
+
+/* רקע עם טינט במרכז שנעלם בקצוות */
+body.is-work{
+  background:
+    radial-gradient(110% 110% at 50% 40%, var(--work-tint) 0%, rgba(255,255,255,0) 62%),
+    var(--bg);
+}
+body.is-rest{
+  background:
+    radial-gradient(110% 110% at 50% 40%, var(--rest-tint) 0%, rgba(255,255,255,0) 62%),
+    var(--bg);
+}
+
+body.no-scroll{overflow:hidden}
+
+.w-container{
+  position:fixed; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  /* שוליים גדולים יותר בצדדים כדי שלא ייגע בקצה באייפד/מסך מפוצל */
+  padding:
+    max(16px,env(safe-area-inset-top))
+    max(28px,env(safe-area-inset-right))
+    max(56px,env(safe-area-inset-bottom))
+    max(28px,env(safe-area-inset-left));
+  min-height:100dvh; overflow:hidden;
+}
+
+/* מסך פתיחה */
+.start-screen{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:24px; background:transparent;
+}
+/* שם האימון – גדול ומורד מעט; יישאר רחוק מהקצוות הודות ל-padding של .w-container */
+.start-name{
+  position:absolute;
+  top:calc(max(16px, env(safe-area-inset-top)) + 44px);
+  left:0; right:0; text-align:center;
+  font-weight:900; letter-spacing:.2px;
+  font-size:clamp(42px,8.5vw,60px);
+}
+
+/* מסך אימון */
+.w-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;transform:translateY(-6vh)}
+.phase{
+  display:inline-block; padding:12px 26px; border-radius:999px;
+  font-size:clamp(18px,4.2vw,26px);
+  background:rgba(11,15,20,.06); color:var(--ink);
+}
+.title{
+  font-size:clamp(64px,15vw,130px); font-weight:900;
+  margin:16px 0 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.sub{font-size:clamp(28px,8vw,52px); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink-muted)}
+.round{font-size:clamp(22px,6.5vw,38px); margin-bottom:14px; color:var(--ink-muted)}
+.timer{font-size:clamp(96px,22vw,220px); font-weight:900; letter-spacing:3px; margin:6px 0 16px}
+
+.primary{display:flex; justify-content:center; margin-top:6px; margin-bottom:18px}
+.btn-primary{
+  border:0; border-radius:20px; padding:22px 34px; font-weight:900;
+  font-size:clamp(20px,6vw,28px); cursor:pointer; min-width:220px;
+  background:var(--btn-primary-bg); color:var(--btn-primary-ink);
+}
+.w-actions{display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:0}
+.btnX{
+  border:1px solid var(--btn-ghost-border);
+  border-radius:16px; padding:16px 24px; font-weight:800; font-size:20px; cursor:pointer; min-width:150px;
+  background:transparent; color:var(--btn-ghost-ink);
+}
+.btnX.ghost:hover{background:rgba(11,15,20,.05)}
+.hidden{display:none!important}
+
+/* סטופר כולל — טקסט בלבד, ללא בלון/רקע/מסגרת */
+.global-stopwatch{
+  position:fixed; left:50%; transform:translateX(-50%);
+  bottom:calc(10px + env(safe-area-inset-bottom)); z-index:10;
+  background:transparent; color:var(--ink); border:0; padding:0; margin:0;
+  font-weight:800; font-size:15px; user-select:none;
+}
+
+/* מסך סיום */
+.finish{
+  position:fixed; inset:0; z-index:5; display:none; align-items:center; justify-content:center; flex-direction:column;
+  background:
+    radial-gradient(110% 110% at 50% 40%, var(--rest-tint) 0%, rgba(255,255,255,0) 62%),
+    var(--bg);
+  color:var(--ink);
+  padding:
+    max(16px,env(safe-area-inset-top))
+    max(28px,env(safe-area-inset-right))
+    max(56px,env(safe-area-inset-bottom))
+    max(28px,env(safe-area-inset-left));
+  overflow:hidden
+}
+.finish-stack{display:flex; flex-direction:column; align-items:center; justify-content:center; transform:translateY(-7.5vh)}
+.finish h2{font-size:clamp(52px,12vw,110px); margin:6px 0 10px; font-weight:900}
+.finish .summary{font-size:clamp(28px,7vw,48px); margin:6px 0 18px; color:var(--ink)}
+</style>
+</head>
+<body class="is-work no-scroll">
+<section class="view" id="viewWorkout" aria-hidden="false">
+  <div id="wRoot" class="w-container">
+
+    <!-- מסך פתיחה נקי -->
+    <div id="startScreen" class="start-screen">
+      <div id="startName" class="start-name">—</div>
+      <button id="startBtn" class="btn-primary">התחל אימון</button>
+      <div class="w-actions" style="margin-top:8px">
+        <button id="exitFromStart" class="btnX">יציאה</button>
+      </div>
+    </div>
+
+    <!-- מסך האימון (מוסתר עד לחיצה על התחלה) -->
+    <div id="stack" class="w-stack hidden" aria-live="polite">
+      <div class="phase" id="phase">WORK</div>
+      <h1 class="title" id="title">—</h1>
+      <div class="sub" id="detail">—</div>
+      <div class="round" id="round">סבב 1/1</div>
+      <div class="timer" id="timer"></div>
+      <div id="primaryWrap" class="primary">
+        <button id="done" class="btn-primary">סיימתי</button>
+      </div>
+      <div class="w-actions">
+        <button id="skip" class="btnX">דלג</button>
+        <button id="exit" class="btnX">יציאה</button>
+      </div>
+    </div>
+
+    <!-- מסך סיום -->
+    <div class="finish" id="finishView" role="dialog" aria-modal="true">
+      <div class="finish-stack">
+        <h2 id="finishTitle">סוף אימון</h2>
+        <div class="summary" id="finishSummary"></div>
+      </div>
+      <div class="w-actions" style="gap:16px;">
+        <button id="finishBack" class="btnX">יציאה</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- סטופר כולל קבוע בתחתית (טקסט בלבד) -->
+<div id="globalStopwatch" class="global-stopwatch">זמן כולל: 00:00</div>
+
+<script>
+(function(){
+  // ===== Helpers
+  const $=id=>document.getElementById(id);
+  function qs(k){ return new URLSearchParams(location.search).get(k); }
+
+  // ===== Load selected workout from localStorage via id
+  const KEY="anaWorkouts_v1";
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]} }
+  const wid=qs("id");
+  const list=load();
+  const selected= list.find(x=>x.id===wid) || list[0];
+
+  // ===== State & DOM
+  const config = selected ? {
+    name:selected.name, rounds:selected.rounds|0, restEx:selected.restEx|0, restRound:selected.restRound|0,
+    phases: selected.phases.map(p=>({n:String(p.n), r:parseInt(p.r,10)||0}))
+  } : { name:"כוח 3x12 ×4", rounds:4, restEx:15, restRound:90, phases:[{n:"מתח",r:12},{n:"שכיבות שמיכה",r:12},{n:"מקבילים",r:12}] };
+
+  let roundN=1, phaseN=0, totalRounds=config.rounds, timer=null, isRest=false, timeLeft=0, restKind=null;
+
+  const phaseEl=$("phase"), title=$("title"), detail=$("detail"), roundEl=$("round"), timerEl=$("timer");
+  const startScreen=$("startScreen"), startName=$("startName");
+  const doneBtn=$("done"), skipBtn=$("skip"), exitBtn=$("exit");
+  const finishView=$("finishView"), finishBack=$("finishBack"), finishSummary=$("finishSummary"), stack=$("stack");
+  const globalSW=$("globalStopwatch");
+
+  // ===== Audio (beeps)
+  let audioCtx=null, audioUnlocked=false;
+  function ensureAudio(){ try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx=null; } }
+  function unlockAudio(){ try{
+    ensureAudio(); if(!audioCtx) return;
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(0.0001,audioCtx.currentTime);
+    o.start(); o.stop(audioCtx.currentTime+0.03);
+    audioUnlocked=true;
+  }catch(e){ audioUnlocked=false; } }
+  function beep(freq,ms,vol){
+    if(!audioUnlocked||!audioCtx) return;
+    try{
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.type="square"; o.frequency.value=freq||920;
+      o.connect(g); g.connect(audioCtx.destination);
+      const gain=Math.max(0.0001,Math.min(1,vol||0.95));
+      g.gain.setValueAtTime(0.0001,audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(gain,audioCtx.currentTime+0.01);
+      o.start();
+      setTimeout(()=>{ try{
+        g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.12);
+        o.stop();
+      }catch(e){} }, ms||180);
+    }catch(e){}
+  }
+  function longBeep(){ beep(520,800,1.0); } // ביפ סיום ארוך וחזק
+
+  // ===== UI & flow
+  function setMode(rest){
+    isRest=rest;
+    requestAnimationFrame(()=>{
+      document.body.classList.toggle("is-rest",rest);
+      document.body.classList.toggle("is-work",!rest);
+      phaseEl.textContent = rest ? "REST" : "WORK";
+      doneBtn.classList.toggle("hidden",rest); // בזמן מנוחה מסתיר "סיימתי"
+    });
+  }
+  function mmss(s){ const m=Math.floor(s/60), t=s%60; return (m<10?"0":"")+m+":"+(t<10?"0":"")+t; }
+  function updateFS(){
+    roundEl.textContent = "סבב "+roundN+"/"+totalRounds;
+    if(isRest){ detail.textContent=""; timerEl.textContent=mmss(timeLeft); }
+    else { const ex=config.phases[phaseN]; detail.textContent=ex.r+" חזרות"; timerEl.textContent=""; }
+  }
+  function clearTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+  function countdown(sec,onEnd){
+    timeLeft=sec; updateFS(); clearTimer();
+    timer=setInterval(()=>{
+      if(timeLeft>0){
+        if(timeLeft<=5) beep(920,170,0.95); // ביפ בכל שנייה ב-5 האחרונות
+        timeLeft--; updateFS();
+      }else{
+        clearTimer(); longBeep(); onEnd && onEnd();
+      }
+    },1000);
+  }
+
+  function showExercise(){
+    const ex=config.phases[phaseN]; if(!ex){ afterRound(); return; }
+    restKind=null; setMode(false);
+    title.textContent=ex.n; updateFS();
+  }
+  function restShort(){ if(config.restEx>0){ restKind='short'; setMode(true); title.textContent="מנוחה קצרה"; countdown(config.restEx,nextPhase); } else nextPhase(); }
+  function restLong(){ if(config.restRound>0){ restKind='long'; setMode(true); title.textContent="מנוחה ארוכה"; countdown(config.restRound,nextRound); } else nextRound(); }
+  function nextPhase(){ phaseN++; if(phaseN>=config.phases.length){ afterRound(); } else { showExercise(); } }
+  function afterRound(){ if(roundN>=totalRounds){ finish(); } else { restLong(); } }
+  function nextRound(){ if(roundN>=totalRounds){ finish(); return; } roundN++; phaseN=0; showExercise(); }
+
+  function calcDurationStr(ms){ const tot=Math.max(0,Math.floor(ms/1000)); const h=Math.floor(tot/3600), m=Math.floor((tot%3600)/60), s=tot%60;
+    const pad=n=>n<10?"0"+n:n; return (h>0?pad(h)+":":"")+pad(m)+":"+pad(s); }
+
+  // ===== סטופר כולל
+  let overallStart=null, overallInterval=null;
+  function startOverall(){
+    overallStart = Date.now();
+    renderOverall();
+    if(overallInterval) clearInterval(overallInterval);
+    overallInterval = setInterval(renderOverall, 1000);
+  }
+  function stopOverall(){
+    if(overallInterval){ clearInterval(overallInterval); overallInterval=null; }
+    renderOverall();
+  }
+  function renderOverall(){
+    const ms = overallStart ? (Date.now() - overallStart) : 0;
+    const sec = Math.floor(ms/1000);
+    const m = Math.floor(sec/60), s = sec%60;
+    const mm = m<10 ? "0"+m : ""+m;
+    const ss = s<10 ? "0"+s : ""+s;
+    globalSW.textContent = "זמן כולל: " + mm + ":" + ss;
+  }
+
+  function finish(){
+    clearTimer(); stopOverall(); setMode(true);
+    stack.classList.add("hidden");
+    finishSummary.textContent = "זמן אימון כולל: " + (overallStart?calcDurationStr(Date.now()-overallStart):"00:00");
+    finishView.style.display="flex";
+  }
+
+  // ===== Buttons
+  $("startBtn").onclick=function(){
+    unlockAudio();
+    startScreen.classList.add("hidden");
+    stack.classList.remove("hidden");
+
+    roundN=1; phaseN=0; clearTimer(); isRest=false; timeLeft=0; restKind=null; totalRounds=config.rounds|0;
+    setMode(false);
+    startOverall();
+    showExercise();
+  };
+  $("exitFromStart").onclick=function(){ clearTimer(); stopOverall(); location.href="library.html"; };
+
+  $("done").onclick=function(){ if(phaseN<config.phases.length-1) restShort(); else afterRound(); };
+  $("skip").onclick=function(){
+    if(isRest){
+      if(restKind==='long'){ if(roundN>=totalRounds){ clearTimer(); finish(); } else { clearTimer(); nextRound(); } }
+      else { clearTimer(); nextPhase(); }
+    }else{
+      nextPhase();
+    }
+  };
+  $("exit").onclick=function(){ clearTimer(); stopOverall(); location.href="library.html"; };
+  $("finishBack").onclick=function(){ location.href="library.html"; };
+
+  // מצב פתיחה
+  document.body.classList.add("no-scroll");
+  document.body.classList.add("is-work");
+  $("startName").textContent = config.name || "אימון";
+  stack.classList.add("hidden");
+  renderOverall();
+
+})();
+</script>
+</body>
+</html>
