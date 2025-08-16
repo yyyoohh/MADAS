@@ -347,6 +347,7 @@ async function releaseWakeLock() {
   // ===== Buttons
   $("startBtn").onclick=function(){
     unlockAudio();
+    requestWakeLock();
     startScreen.classList.add("hidden");
     stack.classList.remove("hidden");
 
