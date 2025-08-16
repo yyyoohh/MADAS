@@ -203,7 +203,26 @@ body.no-scroll{overflow:hidden}
   // ===== Helpers
   const $=id=>document.getElementById(id);
   function qs(k){ return new URLSearchParams(location.search).get(k); }
-
+// ===== Wake Lock
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener?.('release', () => {
+        // console.log('Wake Lock released');
+      });
+    }
+  } catch (err) {
+    // console.warn('Wake Lock request failed:', err);
+  }
+}
+async function releaseWakeLock() {
+  try {
+    await wakeLock?.release?.();
+  } catch {}
+  wakeLock = null;
+}
   // ===== Load selected workout from localStorage via id
   const KEY="anaWorkouts_v1";
   function load(){ try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]} }
