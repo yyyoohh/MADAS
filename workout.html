@@ -342,6 +342,7 @@ async function releaseWakeLock() {
     stack.classList.add("hidden");
     finishSummary.textContent = "זמן אימון כולל: " + (overallStart?calcDurationStr(Date.now()-overallStart):"00:00");
     finishView.style.display="flex";
+    releaseWakeLock();
   }
 
   // ===== Buttons
@@ -356,7 +357,7 @@ async function releaseWakeLock() {
     startOverall();
     showExercise();
   };
-  $("exitFromStart").onclick=function(){ clearTimer(); stopOverall(); location.href="library.html"; };
+  $("exitFromStart").onclick=function(){ clearTimer(); stopOverall(); releaseWakeLock(); location.href="library.html"; };
 
   $("done").onclick=function(){ if(phaseN<config.phases.length-1) restShort(); else afterRound(); };
   $("skip").onclick=function(){
@@ -367,7 +368,7 @@ async function releaseWakeLock() {
       nextPhase();
     }
   };
-  $("exit").onclick=function(){ clearTimer(); stopOverall(); location.href="library.html"; };
+  $("exit").onclick=function(){ clearTimer(); stopOverall(); releaseWakeLock(); location.href="library.html"; };
   $("finishBack").onclick=function(){ location.href="library.html"; };
 
   // מצב פתיחה
